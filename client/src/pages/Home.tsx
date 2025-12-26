@@ -47,30 +47,43 @@ export default function Home() {
       setError(null);
       setLoading(true);
 
-      const formData = new FormData();
-      formData.append('image', file);
-
       try {
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: formData,
-        });
+        // 读取文件为 Base64
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const base64String = (event.target?.result as string)?.split(',')[1];
+            
+            const res = await fetch('/api/generate', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                imageData: base64String,
+                mimeType: file.type
+              }),
+            });
 
-        const data = await res.json();
-        
-        if (!res.ok) throw new Error(data.error || 'Failed to generate');
-        
-        if (data.result) {
-          // Handle both array and string responses
-          const resultImage = Array.isArray(data.result) ? data.result[0] : data.result;
-          setGeneratedImage(resultImage);
-        }
+            const data = await res.json();
+            
+            if (!res.ok) throw new Error(data.error || 'Failed to generate');
+            
+            if (data.result) {
+              // Handle both array and string responses
+              const resultImage = Array.isArray(data.result) ? data.result[0] : data.result;
+              setGeneratedImage(resultImage);
+            }
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+        reader.readAsDataURL(file);
       } catch (err: any) {
         setError(err.message);
-      } finally {
         setLoading(false);
       }
     }
