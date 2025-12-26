@@ -18,17 +18,20 @@ async function startServer() {
   // API Routes
   app.use("/api", apiRouter);
 
-  // Serve static files from dist/public in production
-  const staticPath =
-    process.env.NODE_ENV === "production"
-      ? path.resolve(__dirname, "public")
-      : path.resolve(__dirname, "..", "dist", "public");
+  // Serve static files from dist/public
+  const staticPath = path.resolve(__dirname, "..", "public");
 
   app.use(express.static(staticPath));
 
   // Handle client-side routing - serve index.html for all routes
   app.get("*", (_req, res) => {
-    res.sendFile(path.join(staticPath, "index.html"));
+    const indexPath = path.join(staticPath, "index.html");
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error("Error sending index.html:", err);
+        res.status(404).send("Not found");
+      }
+    });
   });
 
   const port = process.env.PORT || 3000;
