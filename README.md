@@ -160,3 +160,4 @@ Contributions welcome! Please feel free to submit issues and pull requests.
 ---
 
 **Made with ❤️ using Lovart design principles**
+# Stickify - Force Redeploy
